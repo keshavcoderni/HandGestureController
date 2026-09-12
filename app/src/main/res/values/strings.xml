@@ -1,4 +1,0 @@
-<resources>
-    <string name="app_name">Hand Gesture Controller</string>
-    <string name="accessibility_service_description">Controls the phone using hand gestures via the front camera.</string>
-</resources>

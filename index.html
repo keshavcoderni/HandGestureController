@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hand Gesture Controller</title>
+    <meta name="description" content="Touchless gesture controller with real-time hand tracking, customizable cursor, and phone action executor." />
+    <meta property="og:title" content="Hand Gesture Controller" />
+    <meta property="og:description" content="Touchless gesture controller with real-time hand tracking, customizable cursor, and phone action executor." />
+    <!-- MediaPipe Hands & Camera Utils for touchless hand detection -->
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils@0.4.1675466862/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1675469240/hands.js" crossorigin="anonymous"></script>
+  </head>
+  <body class="bg-[#f8f9fa] text-[#1f2937] antialiased">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

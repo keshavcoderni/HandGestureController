@@ -1,0 +1,10 @@
+{
+  "name": "Hand Gesture Controller",
+  "description": "Touchless gesture controller with real-time hand tracking, customizable cursor, and phone action executor.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
