@@ -1,262 +1,163 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { SetupScreen } from './components/SetupScreen';
-import { CameraTracker } from './components/CameraTracker';
-import { DeviceSimulator } from './components/DeviceSimulator';
-import { GestureGuide } from './components/GestureGuide';
-import { GestureOverlayView } from './components/GestureOverlayView';
-import { CursorPreferences } from './overlay/CursorPreferences';
-import { HandGestureController } from './gesture/HandGestureController';
-import { CursorSettings, Gesture, SystemPermissions } from './types';
-import { Sliders, Monitor, Smartphone, BookOpen, Layers } from 'lucide-react';
+import React from "react";
+import { 
+  Smartphone, 
+  Layers, 
+  Camera, 
+  ShieldCheck, 
+  FileCode2, 
+  Settings2, 
+  FolderGit2, 
+  Sparkles, 
+  CheckCircle2, 
+  Terminal
+} from "lucide-react";
 
-export const App: React.FC = () => {
-  const prefs = useMemo(() => new CursorPreferences(), []);
-  const [cursorSettings, setCursorSettings] = useState<CursorSettings>(() => prefs.loadSettings());
-  const [activeGesture, setActiveGesture] = useState<Gesture>(Gesture.NONE);
-  const [activeTab, setActiveTab] = useState<'setup' | 'live' | 'simulator' | 'guide'>('setup');
-  const [fullscreenOverlay, setFullscreenOverlay] = useState(false);
-
-  const [permissions, setPermissions] = useState<SystemPermissions>({
-    camera: false,
-    overlay: true,
-    batteryIgnored: true,
-    accessibilityService: true,
-  });
-
-  const controller = useMemo(() => new HandGestureController(), []);
-  const executor = controller.getActionExecutor();
-
-  // Initialize and listen to actions
-  useEffect(() => {
-    controller.updateSettings(cursorSettings);
-  }, [controller, cursorSettings]);
-
-  useEffect(() => {
-    const cleanup = executor.addListener({
-      onGestureExecuted: (gesture) => {
-        setActiveGesture(gesture);
-      },
-    });
-    return cleanup;
-  }, [executor]);
-
-  // Request system permissions simulation
-  const handleRequestPermission = async (perm: keyof SystemPermissions) => {
-    if (perm === 'camera') {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        stream.getTracks().forEach((t) => t.stop());
-        setPermissions((p) => ({ ...p, camera: true }));
-      } catch (err) {
-        // Fallback simulate grant if in sandboxed iframe without device
-        setPermissions((p) => ({ ...p, camera: true }));
-      }
-    } else {
-      setPermissions((p) => ({ ...p, [perm]: !p[perm] }));
-    }
-  };
-
-  const handleUpdateSettings = (newSettings: CursorSettings) => {
-    setCursorSettings(newSettings);
-    prefs.saveSettings(newSettings);
-    controller.updateSettings(newSettings);
-  };
-
-  const toggleAccessibilityService = () => {
-    setPermissions((p) => {
-      const next = !p.accessibilityService;
-      if (next) {
-        controller.enterActiveMode();
-      } else {
-        controller.enterSleepMode();
-      }
-      return { ...p, accessibilityService: next };
-    });
-  };
+export default function App() {
+  const androidFiles = [
+    { path: "settings.gradle.kts", desc: "Gradle root project configuration & repositories" },
+    { path: "build.gradle.kts", desc: "Root build script (AGP 9.1.1, Kotlin 2.1.0)" },
+    { path: "gradle.properties", desc: "JVM memory allocation & AndroidX flags" },
+    { path: "gradle/wrapper/gradle-wrapper.properties", desc: "Gradle 9.3.1 wrapper config" },
+    { path: "app/build.gradle.kts", desc: "Module build script (SDK 35, Jetpack Compose, CameraX)" },
+    { path: "app/src/main/AndroidManifest.xml", desc: "Camera, Overlay, & Accessibility permissions" },
+    { path: "app/src/main/java/com/gesture/controller/MainActivity.kt", desc: "Jetpack Compose UI & Service controller" },
+    { path: "app/src/main/java/com/gesture/controller/gesture/Gesture.kt", desc: "Gesture enums & 3D landmark models" },
+    { path: "app/src/main/java/com/gesture/controller/gesture/GestureAnalyzer.kt", desc: "MediaPipe Euclidean gesture analyzer" },
+    { path: "app/src/main/java/com/gesture/controller/gesture/ProximityDetector.kt", desc: "Touchless wake/sleep detector" },
+    { path: "app/src/main/java/com/gesture/controller/gesture/HandGestureController.kt", desc: "CameraX pipeline & gesture dispatcher" },
+    { path: "app/src/main/java/com/gesture/controller/overlay/CursorPreferences.kt", desc: "SharedPreferences cursor persistence" },
+    { path: "app/src/main/java/com/gesture/controller/overlay/GestureOverlayService.kt", desc: "System Alert Window floating cursor service" },
+    { path: "app/src/main/java/com/gesture/controller/service/GestureAccessibilityService.kt", desc: "Accessibility Service (Home, Back, Tap, Scroll)" }
+  ];
 
   return (
-    <div id="hand-controller-app" className="min-h-screen bg-[#f3f4f6] text-slate-900 flex flex-col relative">
-      {/* TopAppBar: matching Material 3 TopAppBar in MainActivity.kt */}
-      <header
-        id="top-app-bar"
-        className="sticky top-0 z-30 bg-indigo-900 text-white shadow-md px-4 py-3 flex items-center justify-between"
-      >
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-indigo-700/80 flex items-center justify-center font-bold text-sm shadow-inner">
-            👋
-          </div>
+    <div className="min-h-screen bg-slate-900 text-slate-100 font-sans p-6 md:p-12">
+      <div className="max-w-5xl mx-auto space-y-8">
+        
+        {/* Header */}
+        <header className="border-b border-slate-800 pb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h1 className="font-bold text-lg leading-tight tracking-tight">Hand Controller Pro</h1>
-            <p className="text-[11px] text-indigo-200">Touchless Accessibility Service</p>
+            <div className="flex items-center gap-3">
+              <span className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                <Smartphone className="w-6 h-6" />
+              </span>
+              <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-white">
+                Hand Gesture Controller (Android Native)
+              </h1>
+            </div>
+            <p className="mt-2 text-slate-400 text-sm max-w-2xl">
+              Native Android project built with Kotlin 2.1.0, Jetpack Compose Material 3, Android SDK 35, 
+              CameraX, and Android Accessibility Service for touchless phone navigation.
+            </p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2">
-          {/* Fullscreen Overlay Toggle */}
-          <button
-            id="btn-toggle-fullscreen-overlay"
-            onClick={() => setFullscreenOverlay(!fullscreenOverlay)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
-              fullscreenOverlay
-                ? 'bg-emerald-500 text-white shadow-sm'
-                : 'bg-indigo-800/80 hover:bg-indigo-700 text-indigo-100'
-            }`}
-            title="Render touchless cursor over entire browser window"
-          >
-            <Layers className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Overlay Mode</span>
-          </button>
-
-          {/* Service Status Pill */}
-          <div className="flex items-center gap-1.5 bg-indigo-950/60 px-2.5 py-1 rounded-full text-xs font-medium text-indigo-200 border border-indigo-700/40">
-            <span
-              className={`w-2 h-2 rounded-full ${
-                permissions.accessibilityService ? 'bg-emerald-400 animate-pulse' : 'bg-amber-400'
-              }`}
-            />
-            <span className="hidden sm:inline">
-              {permissions.accessibilityService ? 'Service Active' : 'Service Paused'}
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              Native Android Ready
             </span>
           </div>
+        </header>
+
+        {/* Overview Stats */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60">
+            <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+              <Layers className="w-4 h-4 text-sky-400" />
+              Runtime Architecture
+            </div>
+            <div className="text-lg font-bold text-white">Android SDK 35</div>
+            <div className="text-xs text-slate-400 mt-1">Kotlin 2.1.0 • AGP 9.1.1</div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60">
+            <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+              <Camera className="w-4 h-4 text-indigo-400" />
+              Vision & Tracking
+            </div>
+            <div className="text-lg font-bold text-white">CameraX + MediaPipe</div>
+            <div className="text-xs text-slate-400 mt-1">21 Hand Landmarks • 3D Vectors</div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60">
+            <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
+              System Services
+            </div>
+            <div className="text-lg font-bold text-white">Accessibility + Overlay</div>
+            <div className="text-xs text-slate-400 mt-1">Home, Back, Recents, Tap, Scroll</div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-800/60 border border-slate-700/60">
+            <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold uppercase tracking-wider mb-2">
+              <Settings2 className="w-4 h-4 text-amber-400" />
+              UI Framework
+            </div>
+            <div className="text-lg font-bold text-white">Jetpack Compose M3</div>
+            <div className="text-xs text-slate-400 mt-1">Live Preview & Preferences</div>
+          </div>
         </div>
-      </header>
 
-      {/* Navigation Sub-bar */}
-      <div className="bg-white border-b border-slate-200 sticky top-[57px] z-20 shadow-xs">
-        <div className="max-w-6xl mx-auto px-4 flex items-center justify-center sm:justify-start gap-1 sm:gap-2 py-2 overflow-x-auto">
-          <button
-            id="tab-setup"
-            onClick={() => setActiveTab('setup')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 ${
-              activeTab === 'setup'
-                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <Sliders className="w-3.5 h-3.5" />
-            Setup & Customization
-          </button>
+        {/* Project Files List */}
+        <div className="rounded-xl bg-slate-800/40 border border-slate-700/60 overflow-hidden">
+          <div className="px-6 py-4 border-b border-slate-700/60 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileCode2 className="w-5 h-5 text-indigo-400" />
+              <h2 className="font-semibold text-white text-sm md:text-base">
+                Active Android Project Structure
+              </h2>
+            </div>
+            <span className="text-xs text-slate-400 font-mono">
+              Root Project Layout
+            </span>
+          </div>
 
-          <button
-            id="tab-live"
-            onClick={() => setActiveTab('live')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 ${
-              activeTab === 'live'
-                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <Monitor className="w-3.5 h-3.5" />
-            Live Vision Pipeline
-          </button>
-
-          <button
-            id="tab-simulator"
-            onClick={() => setActiveTab('simulator')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 ${
-              activeTab === 'simulator'
-                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <Smartphone className="w-3.5 h-3.5" />
-            Device Simulator
-          </button>
-
-          <button
-            id="tab-guide"
-            onClick={() => setActiveTab('guide')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors shrink-0 ${
-              activeTab === 'guide'
-                ? 'bg-indigo-50 text-indigo-700 border border-indigo-200'
-                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            Gesture Dictionary
-          </button>
+          <div className="divide-y divide-slate-800/80">
+            {androidFiles.map((file, idx) => (
+              <div key={idx} className="px-6 py-3.5 flex flex-col md:flex-row md:items-center justify-between gap-2 hover:bg-slate-800/30 transition-colors">
+                <div className="font-mono text-sm text-sky-300 font-medium">
+                  {file.path}
+                </div>
+                <div className="text-xs text-slate-400">
+                  {file.desc}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+
+        {/* Build & GitHub Instructions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <div className="p-6 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-3">
+            <div className="flex items-center gap-2 text-white font-semibold text-sm">
+              <Terminal className="w-4 h-4 text-emerald-400" />
+              Building in Android Studio
+            </div>
+            <ol className="text-xs text-slate-300 space-y-2 list-decimal list-inside leading-relaxed">
+              <li>Open <strong>Android Studio</strong> (Ladybug / Iguana or later).</li>
+              <li>Click <strong>Open Project</strong> and select this root directory.</li>
+              <li>Android Studio automatically detects <code className="text-sky-300 bg-slate-900 px-1 py-0.5 rounded">settings.gradle.kts</code>.</li>
+              <li>Sync Gradle and run the <code className="text-sky-300 bg-slate-900 px-1 py-0.5 rounded">:app</code> module on your physical Android device.</li>
+            </ol>
+          </div>
+
+          <div className="p-6 rounded-xl bg-slate-800/40 border border-slate-700/60 space-y-3">
+            <div className="flex items-center gap-2 text-white font-semibold text-sm">
+              <FolderGit2 className="w-4 h-4 text-sky-400" />
+              Export to GitHub
+            </div>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              All unused web conversion and simulator files have been purged. Only the genuine Android Kotlin code, manifests, Gradle configurations, and resources are maintained.
+            </p>
+            <div className="text-xs text-slate-400">
+              Click <strong>Export / Settings</strong> in the top-right header and select <strong>Export to GitHub</strong> to commit directly to your repository.
+            </div>
+          </div>
+
+        </div>
+
       </div>
-
-      {/* Main Body Content */}
-      <main className="flex-1 max-w-6xl mx-auto w-full p-4 sm:p-6">
-        {activeTab === 'setup' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-7">
-              <SetupScreen
-                cursorSettings={cursorSettings}
-                onUpdateSettings={handleUpdateSettings}
-                permissions={permissions}
-                onRequestPermission={handleRequestPermission}
-                onOpenAccessibility={toggleAccessibilityService}
-                activeService={permissions.accessibilityService}
-              />
-            </div>
-            <div className="lg:col-span-5 flex flex-col gap-6">
-              <CameraTracker
-                controller={controller}
-                hasCameraPermission={permissions.camera}
-                onRequestCamera={() => handleRequestPermission('camera')}
-                activeGesture={activeGesture}
-              />
-              <GestureGuide activeGesture={activeGesture} />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'live' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-7 flex flex-col gap-4">
-              <CameraTracker
-                controller={controller}
-                hasCameraPermission={permissions.camera}
-                onRequestCamera={() => handleRequestPermission('camera')}
-                activeGesture={activeGesture}
-              />
-              <GestureGuide activeGesture={activeGesture} />
-            </div>
-            <div className="lg:col-span-5">
-              <DeviceSimulator executor={executor} cursorSettings={cursorSettings} />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'simulator' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-            <div className="lg:col-span-6 flex justify-center">
-              <DeviceSimulator executor={executor} cursorSettings={cursorSettings} />
-            </div>
-            <div className="lg:col-span-6 flex flex-col gap-6">
-              <CameraTracker
-                controller={controller}
-                hasCameraPermission={permissions.camera}
-                onRequestCamera={() => handleRequestPermission('camera')}
-                activeGesture={activeGesture}
-              />
-              <GestureGuide activeGesture={activeGesture} />
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'guide' && (
-          <div className="max-w-3xl mx-auto flex flex-col gap-6">
-            <GestureGuide activeGesture={activeGesture} />
-            <CameraTracker
-              controller={controller}
-              hasCameraPermission={permissions.camera}
-              onRequestCamera={() => handleRequestPermission('camera')}
-              activeGesture={activeGesture}
-            />
-          </div>
-        )}
-      </main>
-
-      {/* Optional Fullscreen Overlay View if user enabled full viewport overlay */}
-      {fullscreenOverlay && (
-        <GestureOverlayView settings={cursorSettings} executor={executor} />
-      )}
     </div>
   );
-};
-
-export default App;
+}
